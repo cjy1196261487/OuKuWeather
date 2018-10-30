@@ -1,0 +1,11 @@
+<litepal>
+    <dbname value="ouku_weather"/>
+    <version value="1"/>
+    <list>
+        <mapping class="com.cjy.oukuweather.db.City"/>
+        <mapping class="com.cjy.oukuweather.db.County"/>
+        <mapping class="com.cjy.oukuweather.db.Province"/>
+    </list>
+
+
+</litepal>
