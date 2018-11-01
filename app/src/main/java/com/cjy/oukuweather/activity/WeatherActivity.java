@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.cjy.oukuweather.R;
 import com.cjy.oukuweather.json.Daily_forecast;
+import com.cjy.oukuweather.json.Heweather;
 import com.cjy.oukuweather.json.Weather;
 import com.cjy.oukuweather.service.AutoupdateService;
 import com.cjy.oukuweather.util.HttpUtil;
@@ -48,6 +49,7 @@ public class WeatherActivity extends AppCompatActivity {
     private ImageView backimg, citybutton;
     public DrawerLayout drawerLayout;
     private Weather weather;
+    private Heweather heweather;
     private SharePreferenceUtil sputil;
 
 
@@ -55,11 +57,7 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sputil=new SharePreferenceUtil(WeatherActivity.this,"saveweather");
-//        if (Build.VERSION.SDK_INT>=21){
-//                View decorView=getWindow().getDecorView();
-//                decorView.setSystemUiVisibility(
-//                        View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                );
+//
             if(Build.VERSION.SDK_INT >= 21){
                 View decorView = getWindow().getDecorView();
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -111,7 +109,8 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                requestWeather(weather.basic.getId());
+                showWeather(heweather);
+
             }
         });
 
@@ -127,7 +126,8 @@ public class WeatherActivity extends AppCompatActivity {
 
     public void requestWeather(String weatherId) {
         sputil.setweatherid(weatherId);
-        String url="http://guolin.tech/api/weather?cityid="+weatherId+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
+      //  String url="http://guolin.tech/api/weather?cityid="+weatherId+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
+        String url="https://free-api.heweather.com/s6/weather?location="+weatherId+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
         HttpUtil.send0khttpRequest(url, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -138,22 +138,33 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String respond_text=response.body().string();
-                Log.e("++++",Utility.handleWeatherResponse(respond_text).toString());
+               // Log.e("++++",Utility.handleWeatherResponse(respond_text).toString());
 //                if (Utility.handleWeatherResponse(respond_text)==null){
 //                    swipeRefreshLayout.setRefreshing(false);
 //
 //                }else {
-                    weather = Utility.handleWeatherResponse(respond_text);
+                heweather = Utility.handleWeatherResponse(respond_text);
+
 
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if (heweather.getStatus().equals("ok")) {
 
-                            showWeather(weather);
-                            swipeRefreshLayout.setRefreshing(false);
+                                showWeather(heweather);
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                            else if(heweather.getStatus().equals("unknown city")) {
+
+                                 Toast.makeText(WeatherActivity.this,"未知地区",Toast.LENGTH_SHORT).show();
+                                swipeRefreshLayout.setRefreshing(false);
+
+                            }
                         }
                     });
+
+
                 }
 
 
@@ -194,41 +205,41 @@ public class WeatherActivity extends AppCompatActivity {
 
 
     }
-    private void showWeather(Weather weather) {
-        if (weather!=null && "ok".equals(weather.status)){
+    private void showWeather(Heweather heweather) {
+        if (heweather!=null && "ok".equals(heweather.getStatus())){
             Intent intent=new Intent(this, AutoupdateService.class);
-            intent.putExtra("cityId",weather.basic.getId());
+            intent.putExtra("cityId",heweather.getBasic().getCid());
             startService(intent);
         }else {
             Toast.makeText(WeatherActivity.this,"获取天气失败",Toast.LENGTH_SHORT).show();
         }
-        titleCity.setText(weather.basic.getCity());
-        String updatetime = weather.basic.getUpdate().getLoc();
+        titleCity.setText(heweather.getBasic().getLocation());
+        String updatetime = heweather.getUpdate().getLoc();
         titleUpdateTime.setText(updatetime);
-        degreeText.setText(weather.now.getTmp() + "℃");
-        weatherInfo.setText(weather.now.getCond_txt());
-        aqiText.setText(weather.aqi.getCity().getAqi());
-        pm25Text.setText(weather.aqi.getCity().getPm25());
-        qutytext.setText(weather.aqi.getCity().getQlty());
-        comfortText.setText("舒适度：" + weather.suggestion.getComf().getTxt());
-        carWashText.setText("洗车 ：" + weather.suggestion.getCw().getTxt());
-        sportText.setText("运动 ：" + weather.suggestion.getSport().getTxt());
+        degreeText.setText(heweather.getNow().getTmp() + "℃");
+        weatherInfo.setText(heweather.getNow().getCond_txt());
+//        aqiText.setText(weather.aqi.getCity().getAqi());
+//        pm25Text.setText(weather.aqi.getCity().getPm25());
+//        qutytext.setText(weather.aqi.getCity().getQlty());
+        comfortText.setText("舒适度：" + heweather.getLifestyle().get(0).getTxt());
+        carWashText.setText("洗车 ：" +heweather.getLifestyle().get(heweather.getLifestyle().size()-2).getTxt());
+        sportText.setText("运动 ：" + heweather.getLifestyle().get(3).getTxt());
         forcastLayout.removeAllViews();
 
-        for (Daily_forecast dailyForecas:weather.getDaily_forecas()) {
+        for (Heweather.DailyForecastBean dailyForecas:heweather.getDaily_forecast()) {
             View view = LayoutInflater.from(this).inflate(R.layout.forcast_item, forcastLayout, false);
             TextView dateText = view.findViewById(R.id.date_info);
             TextView infoText = view.findViewById(R.id.info_text);
             TextView max = view.findViewById(R.id.max_text);
             TextView min = view.findViewById(R.id.min_text);
             dateText.setText(dailyForecas.getDate());
-            infoText.setText(dailyForecas.getCond().getTxt_d());
-            max.setText(dailyForecas.getTmp().getMax()+"℃");
-            min.setText(dailyForecas.getTmp().getMin()+"℃");
+            infoText.setText(dailyForecas.getCond_txt_d());
+            max.setText(dailyForecas.getTmp_max()+"℃");
+            min.setText(dailyForecas.getTmp_min()+"℃");
             forcastLayout.addView(view);
         }
 
-
+        swipeRefreshLayout.setRefreshing(false);
 
     }
 

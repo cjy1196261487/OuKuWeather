@@ -64,23 +64,23 @@ public class AutoupdateService extends Service{
     private void updateWeather(String weatherid ) {
 
 
-        String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherid+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
-        HttpUtil.send0khttpRequest(weatherUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-
-            }
-
-            public void onResponse(Call call, Response response) throws IOException {
-                final String respond_text=response.body().string();
-                Log.e("server reponse",response.toString());
-//                if (Utility.handleWeatherResponse(respond_text)==null){
-//                    swipeRefreshLayout.setRefreshing(false);
+//        String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherid+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
+//        HttpUtil.send0khttpRequest(weatherUrl, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
 //
-//                }else {
-                weather = Utility.handleWeatherResponse(respond_text);
-
-            }
-        });
+//            }
+//
+//            public void onResponse(Call call, Response response) throws IOException {
+//                final String respond_text=response.body().string();
+//                Log.e("server reponse",response.toString());
+////                if (Utility.handleWeatherResponse(respond_text)==null){
+////                    swipeRefreshLayout.setRefreshing(false);
+////
+////                }else {
+//                weather = Utility.handleWeatherResponse(respond_text);
+//
+//            }
+//        });
     }
 }

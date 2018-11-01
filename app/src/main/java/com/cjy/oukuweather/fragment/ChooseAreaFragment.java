@@ -3,6 +3,8 @@ package com.cjy.oukuweather.fragment;
 import android.app.Fragment;
 import android.bluetooth.le.AdvertiseData;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -77,6 +79,11 @@ public class ChooseAreaFragment extends Fragment{
         arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,datalist);
         listView.setAdapter(arrayAdapter);
         sputil = new SharePreferenceUtil(getActivity(), "saveweather");
+//        if(Build.VERSION.SDK_INT >= 21){
+//            View decorView =getActivity().getWindow().getDecorView();
+//            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+//            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+//        }
         return view;
     }
 
@@ -94,7 +101,7 @@ public class ChooseAreaFragment extends Fragment{
                     selectCity = cityList.get(i);
                     queryCounty();
                 }else if (currentlevel==LEVEL_COUNTY){
-                    String weatherid=countyList.get(i).getWeatherId();
+                    String weatherid=countyList.get(i).getCid();
                   //  sputil.setweatherid(weatherid);
 
                     //判断该fragment是否是在MianActivity
@@ -134,6 +141,7 @@ public class ChooseAreaFragment extends Fragment{
         title_Text.setText(selectProvice.getProvinceName());
         backbutton.setVisibility(View.VISIBLE);
         cityList=LitePal.where("provinceId =?",String.valueOf(selectProvice.getId())).find(City.class);
+       // cityList=LitePal.findAll(City.class);
         if (cityList.size()>0){
             datalist.clear();
             for (int i = 0,citylen=cityList.size(); i <citylen ; i++) {
@@ -147,7 +155,7 @@ public class ChooseAreaFragment extends Fragment{
             int provinceCode=selectProvice.getProvinceCode();
             String address="http://guolin.tech/api/china/"+provinceCode;
             queryFromserver(address,"city");
-        }
+       }
 
 
 
@@ -156,11 +164,12 @@ public class ChooseAreaFragment extends Fragment{
     private void queryCounty() {
         title_Text.setText(selectCity.getCityName());
         backbutton.setVisibility(View.VISIBLE);
-        countyList=LitePal.where("cityid = ?",String.valueOf(selectCity.getId())).find(County.class);
+        countyList=LitePal.where("parent_city = ?",String.valueOf(selectCity.getCityName())).find(County.class);
+
         if (countyList.size()>0){
             datalist.clear();
             for (int i = 0,counlen=countyList.size(); i <counlen ; i++) {
-                datalist.add(countyList.get(i).getCountyName());
+                datalist.add(countyList.get(i).getLocation());
             }
             Log.i("county is",countyList.toString());
             arrayAdapter.notifyDataSetChanged();
@@ -168,9 +177,10 @@ public class ChooseAreaFragment extends Fragment{
             currentlevel=LEVEL_COUNTY;
 
         }else {
-            int provinceCode=selectProvice.getProvinceCode();
-            int cityCode=selectCity.getCityCode();
-            String address="http://guolin.tech/api/china/"+provinceCode+"/"+cityCode;
+//            int provinceCode=selectProvice.getProvinceCode();
+//            int cityCode=selectCity.getCityCode();
+        String CountyName=selectCity.getCityName();
+        String address="https://search.heweather.com/find?location="+CountyName+"&key=2c07f3cfca7440a48d2b7c0b52975dd7";
             queryFromserver(address,"country");
         }
     }
@@ -205,13 +215,14 @@ public class ChooseAreaFragment extends Fragment{
             public void onResponse(Call call, Response response) throws IOException {
                 boolean result=false;
                 String strresponse=response.body().string();
+                Log.e("response ",strresponse);
 
                 if ("province".equals(type)){
                     result= Utility.handlerprovinceRequset(strresponse);
                 }else if ("city".equals(type)){
                     result=Utility.handlercityRequset(strresponse,selectProvice.getId());
                 }else  if ("country".equals(type)){
-                    result=Utility.handlercountyRequset(strresponse,selectCity.getId());
+                    result=Utility.handlercountyRequset(strresponse,selectCity.getCityName());
 
                 }
                 if (result){
