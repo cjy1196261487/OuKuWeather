@@ -31,6 +31,9 @@ import com.cjy.oukuweather.util.HttpUtil;
 import com.cjy.oukuweather.util.SharePreferenceUtil;
 import com.cjy.oukuweather.util.Utility;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +54,7 @@ public class WeatherActivity extends AppCompatActivity {
     private Weather weather;
     private Heweather heweather;
     private SharePreferenceUtil sputil;
+    public static String GET_CITY_NAME_TENCENT="https://apis.map.qq.com/ws/location/v1/ip?key=TZEBZ-JGDLU-HAGV6-2JNEY-MYBL6-EXBL7";
 
 
     @Override
@@ -66,14 +70,36 @@ public class WeatherActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_weather);
         initView();
-
         loadPic();
-        requestWeather("CN101240508");
+        loadLocal(GET_CITY_NAME_TENCENT);
         initlisten();
 
 
 
 
+    }
+
+    private void loadLocal(String getCityNameTencent) {
+        HttpUtil.send0khttpRequest(getCityNameTencent, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+               final String json=response.body().string();
+                try {
+                    JSONObject object = new JSONObject(json).getJSONObject("result").getJSONObject("ad_info");
+                    String city=object.getString("district");
+                    requestWeather(city);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
     }
 
     private void loadPic() {
@@ -137,45 +163,28 @@ public class WeatherActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                final String respond_text=response.body().string();
-               // Log.e("++++",Utility.handleWeatherResponse(respond_text).toString());
-//                if (Utility.handleWeatherResponse(respond_text)==null){
-//                    swipeRefreshLayout.setRefreshing(false);
-//
-//                }else {
+                final String respond_text = response.body().string();
+
                 heweather = Utility.handleWeatherResponse(respond_text);
+                Log.i("实时天气是",heweather.toString());
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (heweather.getStatus().equals("ok")) {
 
+                            showWeather(heweather);
+                            swipeRefreshLayout.setRefreshing(false);
+                        } else if (heweather.getStatus().equals("unknown city")) {
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (heweather.getStatus().equals("ok")) {
+                            Toast.makeText(WeatherActivity.this, "未知地区", Toast.LENGTH_SHORT).show();
+                            swipeRefreshLayout.setRefreshing(false);
 
-                                showWeather(heweather);
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
-                            else if(heweather.getStatus().equals("unknown city")) {
-
-                                 Toast.makeText(WeatherActivity.this,"未知地区",Toast.LENGTH_SHORT).show();
-                                swipeRefreshLayout.setRefreshing(false);
-
-                            }
                         }
-                    });
-
-
-                }
-
-
-
-
+                    }
+                });
+            }
         });
-
-
-
-
-
 
     }
 
