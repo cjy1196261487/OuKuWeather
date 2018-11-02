@@ -78,6 +78,19 @@ public class Heweather {
         this.lifestyle = lifestyle;
     }
 
+    @Override
+    public String toString() {
+        return "Heweather{" +
+                "basic=" + basic +
+                ", now=" + now +
+                ", status='" + status + '\'' +
+                ", update=" + update +
+                ", daily_forecast=" + daily_forecast +
+                ", hourly=" + hourly +
+                ", lifestyle=" + lifestyle +
+                '}';
+    }
+
     public static class BasicBean {
         /**
          * cid : CN101010100
@@ -161,6 +174,20 @@ public class Heweather {
 
         public void setTz(String tz) {
             this.tz = tz;
+        }
+
+        @Override
+        public String toString() {
+            return "BasicBean{" +
+                    "cid='" + cid + '\'' +
+                    ", location='" + location + '\'' +
+                    ", parent_city='" + parent_city + '\'' +
+                    ", admin_area='" + admin_area + '\'' +
+                    ", cnty='" + cnty + '\'' +
+                    ", lat='" + lat + '\'' +
+                    ", lon='" + lon + '\'' +
+                    ", tz='" + tz + '\'' +
+                    '}';
         }
     }
 
@@ -288,6 +315,24 @@ public class Heweather {
         public void setWind_spd(String wind_spd) {
             this.wind_spd = wind_spd;
         }
+
+        @Override
+        public String toString() {
+            return "NowBean{" +
+                    "cond_code='" + cond_code + '\'' +
+                    ", cond_txt='" + cond_txt + '\'' +
+                    ", fl='" + fl + '\'' +
+                    ", hum='" + hum + '\'' +
+                    ", pcpn='" + pcpn + '\'' +
+                    ", pres='" + pres + '\'' +
+                    ", tmp='" + tmp + '\'' +
+                    ", vis='" + vis + '\'' +
+                    ", wind_deg='" + wind_deg + '\'' +
+                    ", wind_dir='" + wind_dir + '\'' +
+                    ", wind_sc='" + wind_sc + '\'' +
+                    ", wind_spd='" + wind_spd + '\'' +
+                    '}';
+        }
     }
 
     public static class UpdateBean {
@@ -313,6 +358,14 @@ public class Heweather {
 
         public void setUtc(String utc) {
             this.utc = utc;
+        }
+
+        @Override
+        public String toString() {
+            return "UpdateBean{" +
+                    "loc='" + loc + '\'' +
+                    ", utc='" + utc + '\'' +
+                    '}';
         }
     }
 
@@ -490,6 +543,29 @@ public class Heweather {
         public void setWind_spd(String wind_spd) {
             this.wind_spd = wind_spd;
         }
+
+        @Override
+        public String toString() {
+            return "DailyForecastBean{" +
+                    "cond_code_d='" + cond_code_d + '\'' +
+                    ", cond_code_n='" + cond_code_n + '\'' +
+                    ", cond_txt_d='" + cond_txt_d + '\'' +
+                    ", cond_txt_n='" + cond_txt_n + '\'' +
+                    ", date='" + date + '\'' +
+                    ", hum='" + hum + '\'' +
+                    ", pcpn='" + pcpn + '\'' +
+                    ", pop='" + pop + '\'' +
+                    ", pres='" + pres + '\'' +
+                    ", tmp_max='" + tmp_max + '\'' +
+                    ", tmp_min='" + tmp_min + '\'' +
+                    ", uv_index='" + uv_index + '\'' +
+                    ", vis='" + vis + '\'' +
+                    ", wind_deg='" + wind_deg + '\'' +
+                    ", wind_dir='" + wind_dir + '\'' +
+                    ", wind_sc='" + wind_sc + '\'' +
+                    ", wind_spd='" + wind_spd + '\'' +
+                    '}';
+        }
     }
 
     public static class HourlyBean {
@@ -616,6 +692,24 @@ public class Heweather {
         public void setWind_spd(String wind_spd) {
             this.wind_spd = wind_spd;
         }
+
+        @Override
+        public String toString() {
+            return "HourlyBean{" +
+                    "cloud='" + cloud + '\'' +
+                    ", cond_code='" + cond_code + '\'' +
+                    ", cond_txt='" + cond_txt + '\'' +
+                    ", hum='" + hum + '\'' +
+                    ", pop='" + pop + '\'' +
+                    ", pres='" + pres + '\'' +
+                    ", time='" + time + '\'' +
+                    ", tmp='" + tmp + '\'' +
+                    ", wind_deg='" + wind_deg + '\'' +
+                    ", wind_dir='" + wind_dir + '\'' +
+                    ", wind_sc='" + wind_sc + '\'' +
+                    ", wind_spd='" + wind_spd + '\'' +
+                    '}';
+        }
     }
 
     public static class LifestyleBean {
@@ -651,6 +745,15 @@ public class Heweather {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        @Override
+        public String toString() {
+            return "LifestyleBean{" +
+                    "brf='" + brf + '\'' +
+                    ", txt='" + txt + '\'' +
+                    ", type='" + type + '\'' +
+                    '}';
         }
     }
 }
