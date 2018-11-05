@@ -30,17 +30,22 @@ import com.cjy.oukuweather.service.AutoupdateService;
 import com.cjy.oukuweather.util.HttpUtil;
 import com.cjy.oukuweather.util.SharePreferenceUtil;
 import com.cjy.oukuweather.util.Utility;
+import com.github.mikephil.charting.charts.LineChart;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class WeatherActivity extends AppCompatActivity {
 
@@ -54,7 +59,9 @@ public class WeatherActivity extends AppCompatActivity {
     private Weather weather;
     private Heweather heweather;
     private SharePreferenceUtil sputil;
+    private LineChart mlinechart;
     public static String GET_CITY_NAME_TENCENT="https://apis.map.qq.com/ws/location/v1/ip?key=TZEBZ-JGDLU-HAGV6-2JNEY-MYBL6-EXBL7";
+    private SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 
     @Override
@@ -71,7 +78,12 @@ public class WeatherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_weather);
         initView();
         loadPic();
-        loadLocal(GET_CITY_NAME_TENCENT);
+        if (sputil.getweatherid()==null) {
+            loadLocal(GET_CITY_NAME_TENCENT);
+        }else {
+            requestWeather(sputil.getweatherid());
+        }
+
         initlisten();
 
 
@@ -135,7 +147,8 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                showWeather(heweather);
+               requestWeather(sputil.getweatherid());
+
 
             }
         });
@@ -157,7 +170,14 @@ public class WeatherActivity extends AppCompatActivity {
         HttpUtil.send0khttpRequest(url, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                swipeRefreshLayout.setRefreshing(false);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+
+                    }
+                });
+
 
             }
 
@@ -208,12 +228,17 @@ public class WeatherActivity extends AppCompatActivity {
         backimg=findViewById(R.id.backgroun_pic);
         citybutton=findViewById(R.id.city_select);
         drawerLayout=findViewById(R.id.drawer_layout);
-
-
-
+        mlinechart=findViewById(R.id.timeweather);
+      //设置可以被拖动
+        mlinechart.setDragEnabled(true);
+        //设置网格是否可见
+        mlinechart.setDrawBorders(false);
 
 
     }
+
+
+
     private void showWeather(Heweather heweather) {
         if (heweather!=null && "ok".equals(heweather.getStatus())){
             Intent intent=new Intent(this, AutoupdateService.class);
@@ -222,8 +247,12 @@ public class WeatherActivity extends AppCompatActivity {
         }else {
             Toast.makeText(WeatherActivity.this,"获取天气失败",Toast.LENGTH_SHORT).show();
         }
+        String updatetime = heweather.getUpdate().getLoc().split("\\s")[1];
+
+           // Log.e("",""+simpleDateFormat.parse(updatetime));
+
+
         titleCity.setText(heweather.getBasic().getLocation());
-        String updatetime = heweather.getUpdate().getLoc();
         titleUpdateTime.setText(updatetime);
         degreeText.setText(heweather.getNow().getTmp() + "℃");
         weatherInfo.setText(heweather.getNow().getCond_txt());
