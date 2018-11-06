@@ -3,6 +3,7 @@ package com.cjy.oukuweather.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.icu.text.AlphabeticIndex;
 import android.os.Build;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -31,11 +32,22 @@ import com.cjy.oukuweather.util.HttpUtil;
 import com.cjy.oukuweather.util.SharePreferenceUtil;
 import com.cjy.oukuweather.util.Utility;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.KeyStore;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +57,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 
 public class WeatherActivity extends AppCompatActivity {
@@ -61,7 +74,9 @@ public class WeatherActivity extends AppCompatActivity {
     private SharePreferenceUtil sputil;
     private LineChart mlinechart;
     public static String GET_CITY_NAME_TENCENT="https://apis.map.qq.com/ws/location/v1/ip?key=TZEBZ-JGDLU-HAGV6-2JNEY-MYBL6-EXBL7";
-    private SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private ArrayList<String>timedate=new ArrayList<>();
+
+
 
 
     @Override
@@ -77,7 +92,7 @@ public class WeatherActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_weather);
         initView();
-        loadPic();
+       loadPic();
         if (sputil.getweatherid()==null) {
             loadLocal(GET_CITY_NAME_TENCENT);
         }else {
@@ -228,11 +243,14 @@ public class WeatherActivity extends AppCompatActivity {
         backimg=findViewById(R.id.backgroun_pic);
         citybutton=findViewById(R.id.city_select);
         drawerLayout=findViewById(R.id.drawer_layout);
-        mlinechart=findViewById(R.id.timeweather);
-      //设置可以被拖动
-        mlinechart.setDragEnabled(true);
-        //设置网格是否可见
-        mlinechart.setDrawBorders(false);
+
+
+
+
+
+
+
+
 
 
     }
@@ -256,6 +274,9 @@ public class WeatherActivity extends AppCompatActivity {
         titleUpdateTime.setText(updatetime);
         degreeText.setText(heweather.getNow().getTmp() + "℃");
         weatherInfo.setText(heweather.getNow().getCond_txt());
+        initChart(heweather);
+
+
 //        aqiText.setText(weather.aqi.getCity().getAqi());
 //        pm25Text.setText(weather.aqi.getCity().getPm25());
 //        qutytext.setText(weather.aqi.getCity().getQlty());
@@ -281,9 +302,63 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
+    private void initChart(Heweather heweather) {
+         XAxis xa;
+         YAxis ya;
+        mlinechart=findViewById(R.id.timeweather);
+        mlinechart.setDrawBorders(true);
 
 
+
+
+        List<Heweather.HourlyBean>hourlyBeans=heweather.getHourly();
+
+        Log.i("hourlyBeans size",""+hourlyBeans.size());
+        //折线图数据填充
+        //设置数据
+        List<Entry>entries=new ArrayList<>();
+        for (int i = 0; i <hourlyBeans.size() ; i++) {
+            entries.add(new Entry(i,(float)Integer.parseInt(hourlyBeans.get(i).getTmp())));
+        }
+        //刷新数据
+        mlinechart.invalidate();
+        //设置linedateaert
+        LineDataSet lineDataSet=new LineDataSet(entries,"温度");
+        lineDataSet.setValueFormatter(new IValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+                return (int)value+"℃";
+            }
+        });
+
+        lineDataSet.setValueTextColor(Color.RED);
+        LineData lineData=new LineData(lineDataSet);
+        mlinechart.setData(lineData);
+        for (int i = 0; i <hourlyBeans.size() ; i++) {
+            timedate.add(hourlyBeans.get(i).getTime().split("\\s")[1]);
+        }
+//        mlinechart.notifyDataSetChanged();
+
+        xa=mlinechart.getXAxis();
+        xa.setTextColor(Color.WHITE);
+        xa.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return timedate.get((int)value);
+            }
+        });
+        ya=mlinechart.getAxisLeft();
+        ya.setTextColor(Color.WHITE);
+        ya.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return (int)value+"℃";
+            }
+        });
     }
+
+
+}
 
 
 
