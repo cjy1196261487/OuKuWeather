@@ -72,9 +72,9 @@ public class WeatherActivity extends AppCompatActivity {
     private Weather weather;
     private Heweather heweather;
     private SharePreferenceUtil sputil;
-    private LineChart mlinechart;
+
     public static String GET_CITY_NAME_TENCENT="https://apis.map.qq.com/ws/location/v1/ip?key=TZEBZ-JGDLU-HAGV6-2JNEY-MYBL6-EXBL7";
-    private ArrayList<String>timedate=new ArrayList<>();
+
 
 
 
@@ -303,6 +303,8 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     private void initChart(Heweather heweather) {
+         final  ArrayList<String>timedate=new ArrayList<>();
+         LineChart mlinechart;
          XAxis xa;
          YAxis ya;
         mlinechart=findViewById(R.id.timeweather);
@@ -352,7 +354,7 @@ public class WeatherActivity extends AppCompatActivity {
         ya.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
-                return (int)value+"℃";
+                return value+"℃";
             }
         });
     }
