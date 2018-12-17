@@ -1,13 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <fragment
-        android:id="@+id/choose_area_fragment"
-        android:name="com.cjy.oukuweather.fragment.ChooseAreaFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+  <FrameLayout
+      android:id="@+id/frame"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      app:layout_constraintTop_toTopOf="@id/rg"
+      app:layout_constraintVertical_weight="8">
 
-</FrameLayout>
+  </FrameLayout>
+
+
+    <RadioGroup
+        app:layout_constraintVertical_weight="1"
+        android:id="@+id/rg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal">
+
+
+        <RadioButton
+             android:id="@+id/weather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawableTop="@mipmap/weather_select"
+            android:text="天气"
+            android:textAlignment="center" />
+
+        <RadioButton
+            android:id="@+id/ganhuo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawableTop="@mipmap/ganhuo_select"
+            android:text="干货"
+            android:textAlignment="center" />
+
+
+    </RadioGroup>
+
+
+
+
+</android.support.constraint.ConstraintLayout>

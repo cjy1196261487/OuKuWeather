@@ -1,21 +1,18 @@
 package com.cjy.oukuweather.activity;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.graphics.Color;
-import android.icu.text.AlphabeticIndex;
-import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -24,7 +21,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.cjy.oukuweather.R;
-import com.cjy.oukuweather.json.Daily_forecast;
 import com.cjy.oukuweather.json.Heweather;
 import com.cjy.oukuweather.json.Weather;
 import com.cjy.oukuweather.service.AutoupdateService;
@@ -40,27 +36,21 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.KeyStore;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 
-public class WeatherActivity extends BaseActivity {
+public class WeatherFragment extends Fragment {
 
     private ScrollView weatherscrollview;
     private TextView titleCity,titleUpdateTime,degreeText,weatherInfo,aqiText,pm25Text,comfortText,carWashText,sportText,qutytext;
@@ -82,12 +72,23 @@ public class WeatherActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sputil=new SharePreferenceUtil(WeatherActivity.this,"saveweather");
+        sputil=new SharePreferenceUtil(getActivity(),"saveweather");
 
 
-        setContentView(R.layout.activity_weather);
-        initView();
-       loadPic();
+
+
+
+
+
+
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        View view=inflater.inflate(R.layout.activity_weather,container,false);
+        initView(view);
+        loadPic();
         if (sputil.getweatherid()==null) {
             loadLocal(GET_CITY_NAME_TENCENT);
         }else {
@@ -95,10 +96,7 @@ public class WeatherActivity extends BaseActivity {
         }
 
         initlisten();
-
-
-
-
+        return view;
     }
 
     private void loadLocal(String getCityNameTencent) {
@@ -136,13 +134,16 @@ public class WeatherActivity extends BaseActivity {
             public void onResponse(Call call, final Response response) throws IOException {
                 final String picurl=response.body().string();
                 Log.e("bing 每日一图 url",picurl);
-                runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Glide.with(WeatherActivity.this).load(picurl).into(backimg);
+                        Glide.with(WeatherFragment.this).load(picurl).into(backimg);
 
                     }
                 });
+
+
+
 
 
 
@@ -180,13 +181,10 @@ public class WeatherActivity extends BaseActivity {
         HttpUtil.send0khttpRequest(url, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+
                         swipeRefreshLayout.setRefreshing(false);
 
-                    }
-                });
+
 
 
             }
@@ -198,46 +196,49 @@ public class WeatherActivity extends BaseActivity {
                 heweather = Utility.handleWeatherResponse(respond_text);
                 Log.i("实时天气是",heweather.toString());
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (heweather.getStatus().equals("ok")) {
 
-                            showWeather(heweather);
+                        if (heweather.getStatus().equals("ok")) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showWeather(heweather);
+                                }
+                            });
+
+
                             swipeRefreshLayout.setRefreshing(false);
                         } else if (heweather.getStatus().equals("unknown city")) {
 
-                            Toast.makeText(WeatherActivity.this, "未知地区", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "未知地区", Toast.LENGTH_SHORT).show();
                             swipeRefreshLayout.setRefreshing(false);
 
                         }
-                    }
-                });
+
             }
         });
 
     }
 
 
-    private void initView() {
+    private void initView(View view) {
 //        初始化控件
-        weatherscrollview=findViewById(R.id.weather_layout);
-        titleCity=findViewById(R.id.title_city);
-        titleUpdateTime=findViewById(R.id.title_updatetime);
-        degreeText=findViewById(R.id.degree_text);
-        weatherInfo=findViewById(R.id.weatherinfo_text);
-        aqiText=findViewById(R.id.aqi_text);
-        pm25Text=findViewById(R.id.pm25_text);
-        qutytext=findViewById(R.id.quty_text);
-        comfortText=findViewById(R.id.comfort_text);
-        carWashText=findViewById(R.id.car_text);
-        sportText=findViewById(R.id.sport_text);
-        forcastLayout=findViewById(R.id.forecast_layout);
-        swipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.refresh);
+        weatherscrollview=view.findViewById(R.id.weather_layout);
+        titleCity=view.findViewById(R.id.title_city);
+        titleUpdateTime=view.findViewById(R.id.title_updatetime);
+        degreeText=view.findViewById(R.id.degree_text);
+        weatherInfo=view.findViewById(R.id.weatherinfo_text);
+        aqiText=view.findViewById(R.id.aqi_text);
+        pm25Text=view.findViewById(R.id.pm25_text);
+        qutytext=view.findViewById(R.id.quty_text);
+        comfortText=view.findViewById(R.id.comfort_text);
+        carWashText=view.findViewById(R.id.car_text);
+        sportText=view.findViewById(R.id.sport_text);
+        forcastLayout=view.findViewById(R.id.forecast_layout);
+        swipeRefreshLayout=(SwipeRefreshLayout)view.findViewById(R.id.refresh);
         swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
-        backimg=findViewById(R.id.backgroun_pic);
-        citybutton=findViewById(R.id.city_select);
-        drawerLayout=findViewById(R.id.drawer_layout);
+        backimg=view.findViewById(R.id.backgroun_pic);
+        citybutton=view.findViewById(R.id.city_select);
+        drawerLayout=view.findViewById(R.id.drawer_layout);
 
 
 
@@ -254,11 +255,11 @@ public class WeatherActivity extends BaseActivity {
 
     private void showWeather(Heweather heweather) {
         if (heweather!=null && "ok".equals(heweather.getStatus())){
-            Intent intent=new Intent(this, AutoupdateService.class);
+            Intent intent=new Intent(getActivity(), AutoupdateService.class);
             intent.putExtra("cityId",heweather.getBasic().getCid());
-            startService(intent);
+            getActivity().startService(intent);
         }else {
-            Toast.makeText(WeatherActivity.this,"获取天气失败",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),"获取天气失败",Toast.LENGTH_SHORT).show();
         }
         String updatetime = heweather.getUpdate().getLoc().split("\\s")[1];
 
@@ -281,7 +282,7 @@ public class WeatherActivity extends BaseActivity {
         forcastLayout.removeAllViews();
 
         for (Heweather.DailyForecastBean dailyForecas:heweather.getDaily_forecast()) {
-            View view = LayoutInflater.from(this).inflate(R.layout.forcast_item, forcastLayout, false);
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.forcast_item, forcastLayout, false);
             TextView dateText = view.findViewById(R.id.date_info);
             TextView infoText = view.findViewById(R.id.info_text);
             TextView max = view.findViewById(R.id.max_text);
@@ -302,7 +303,7 @@ public class WeatherActivity extends BaseActivity {
          LineChart mlinechart;
          XAxis xa;
          YAxis ya;
-        mlinechart=findViewById(R.id.timeweather);
+        mlinechart=getActivity().findViewById(R.id.timeweather);
         mlinechart.setDrawBorders(true);
 
 

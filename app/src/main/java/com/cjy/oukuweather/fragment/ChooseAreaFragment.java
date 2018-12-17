@@ -1,6 +1,7 @@
 package com.cjy.oukuweather.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.bluetooth.le.AdvertiseData;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import com.cjy.oukuweather.MainActivity;
 import com.cjy.oukuweather.R;
 import com.cjy.oukuweather.activity.WeatherActivity;
+import com.cjy.oukuweather.activity.WeatherFragment;
 import com.cjy.oukuweather.db.City;
 import com.cjy.oukuweather.db.County;
 import com.cjy.oukuweather.db.Province;
@@ -79,6 +81,7 @@ public class ChooseAreaFragment extends Fragment{
         arrayAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,datalist);
         listView.setAdapter(arrayAdapter);
         sputil = new SharePreferenceUtil(getActivity(), "saveweather");
+
 //        if(Build.VERSION.SDK_INT >= 21){
 //            View decorView =getActivity().getWindow().getDecorView();
 //            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -106,10 +109,14 @@ public class ChooseAreaFragment extends Fragment{
 
                     //判断该fragment是否是在MianActivity
                     if (getActivity()instanceof MainActivity){
-                        Intent intent=new Intent(getActivity(), WeatherActivity.class);
-                        intent.putExtra("weather_id",weatherid);
-                        startActivity(intent);
-                        getActivity().finish();
+//                     WeatherFragment weatherFragment=new WeatherFragment();
+////                        Intent intent=new Intent(getActivity(), WeatherFragment.class);
+//                        FragmentTransaction transaction = getActivity().getFragmentManager().beginTransaction();
+//                        transaction.replace(R.id.weatherFram, weatherFragment);
+//                        transaction.commit()
+////                        intent.putExtra("weather_id",weatherid);
+////                        startActivity(intent);
+////                        getActivity().finish();
                     } else if (getActivity()instanceof WeatherActivity){
                         WeatherActivity activity=(WeatherActivity) getActivity();
                         activity.drawerLayout.closeDrawers();
